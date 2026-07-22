@@ -1,0 +1,11 @@
+{
+  "name": "lookout",
+  "version": "1.0.0",
+  "description": "Dependency security and license audit sentinel",
+  "main": "lib/lookout.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/lookout.test.js"
+  },
+  "license": "MIT"
+}
