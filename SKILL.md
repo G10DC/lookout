@@ -19,3 +19,7 @@ Audit package manifest in current directory:
 ```bash
 node C:/Users/GdC/.gemini/config/skills/lookout/lib/lookout.js --manifest "package.json"
 ```
+
+## When NOT to use
+- **Evaluating codebase style, quality, or static code issues**: For static code review of your own JavaScript/Python files before commit → use `mirror` instead.
+- **Active network/server pentesting**: For active host scanning and service exploitation → use `siege` instead.
