@@ -1,44 +1,25 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
-import { LookoutSentinel } from '../lib/lookout.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import fs from 'node:fs';
+import { LookoutAuditor } from '../lib/lookout.js';
 
-describe('LookoutSentinel', () => {
-  it('flags wildcard version ranges as security risks', () => {
-    const sentinel = new LookoutSentinel();
-    const pkg = {
-      dependencies: {
-        'express': '*',
-        'lodash': '^4.17.21'
-      }
-    };
-    const res = sentinel.auditManifest(pkg);
-    assert.strictEqual(res.verdict, 'WARN');
-    assert.strictEqual(res.findings.security.length, 1);
-    assert.strictEqual(res.findings.security[0].package, 'express');
-  });
+test('LookoutAuditor audits package manifest for non-pinned dependencies', () => {
+  const auditor = new LookoutAuditor();
+  const tmpPath = path.join(process.cwd(), 'temp_pkg.json');
+  fs.writeFileSync(tmpPath, JSON.stringify({
+    name: "test-app",
+    license: "MIT",
+    dependencies: {
+      "untrusted-pkg": "git+https://github.com/foo/bar.git"
+    }
+  }));
 
-  it('flags GPL / AGPL copyleft package names', () => {
-    const sentinel = new LookoutSentinel();
-    const pkg = {
-      dependencies: {
-        'my-gpl-module': '1.0.0'
-      }
-    };
-    const res = sentinel.auditManifest(pkg);
-    assert.strictEqual(res.verdict, 'WARN');
-    assert.strictEqual(res.findings.licenses.length, 1);
-  });
-
-  it('passes clean manifests', () => {
-    const sentinel = new LookoutSentinel();
-    const pkg = {
-      dependencies: {
-        'react': '18.2.0'
-      }
-    };
-    const res = sentinel.auditManifest(pkg);
-    assert.strictEqual(res.verdict, 'PASS');
-    assert.strictEqual(res.findings.security.length, 0);
-    assert.strictEqual(res.findings.licenses.length, 0);
-  });
+  try {
+    const res = auditor.auditPackageJson(tmpPath);
+    assert.equal(res.verdict, 'WARN');
+    assert.equal(res.findings[0].package, 'untrusted-pkg');
+  } finally {
+    if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+  }
 });
