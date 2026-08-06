@@ -1,6 +1,12 @@
 ---
 name: lookout
-description: Audits declared dependencies for known vulnerabilities and license compliance issues — validates node_modules (or equivalent) against security advisories and license policy before a build ships. Use for/when checking if a package or its transitive dependencies have known CVEs, verifying license compatibility before release, or gating a build on dependency health. Never review the application's own diff or code logic (use mirror instead); never actively probe or exploit a live target (use siege instead) — lookout only reads dependency manifests and advisory databases, it never touches source logic or running services.
+description: >-
+  Audits declared dependencies for known vulnerabilities and license compliance
+  issues -- validates node_modules or equivalent against security advisories and
+  license policy before a build ships. Use when checking if a package has known
+  CVEs or verifying license compatibility before release. Never review
+  application source code logic -- use mirror instead; never actively probe a
+  live target -- use siege instead.
 ---
 
 # lookout
