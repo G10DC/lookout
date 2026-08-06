@@ -24,6 +24,7 @@ A secure codebase built on a vulnerable dependency is still vulnerable. One rule
 
 ## When to use
 
+<<<<<<< HEAD
 - Checking a package or its transitive dependencies for known CVEs before release.
 - Verifying license compatibility across the full dependency tree.
 - Gating a build on dependency health as part of a verify/release phase.
@@ -34,3 +35,19 @@ A secure codebase built on a vulnerable dependency is still vulnerable. One rule
   use `mirror`. Lookout never reads application code.
 - **The goal is to actively probe or exploit a live target, not audit static manifests** →
   use `siege`. Lookout is passive and manifest-scoped; it never touches running services.
+=======
+Audit package manifest in current directory:
+```bash
+node lib/lookout.js --manifest "package.json"
+```
+
+
+---
+
+## ⚡ Spark Breakthrough Enhancement
+
+- **Feature**: **Real-Time Vulnerability Egress Guard**
+- **Description**: Blocks risky AGPL licenses and compromised package manifests pre-commit.
+- **Synergy**: Integrated with `sentinel` (firewall) & `shipwright` (git publisher).
+- **Framework**: Applied via the `spark` 4-Lens Lateral Ideation Engine.
+>>>>>>> 4b7eb2f (feat(spark): integrate spark breakthrough enhancements into lookout)
