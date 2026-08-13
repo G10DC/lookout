@@ -1,5 +1,6 @@
 ---
 name: lookout
+status: implemented
 description: >-
   Audits declared dependencies for known vulnerabilities and license compliance
   issues -- validates node_modules or equivalent against security advisories and
@@ -16,43 +17,40 @@ A secure codebase built on a vulnerable dependency is still vulnerable. One rule
 
 ## Golden rules
 
-1. **Scope is the dependency tree, not application code.** Lookout reads manifests
-   (`package.json`/lockfiles) and advisory databases — it never inspects the application's own
-   logic or diff.
-2. **License checks are a hard gate, same as security.** An incompatible license blocks the same
-   way a critical CVE does — license risk is not a lower tier of finding.
-3. **Transitive dependencies count.** A vulnerability three levels deep in the tree is still a
-   finding; scope includes the full resolved tree, not just direct dependencies.
-4. **Advisory data must be current, not cached indefinitely.** Stale advisory data produces false
-   negatives — refresh before a release-gating run, not just on a schedule.
-5. **A finding here is a build gate, not a suggestion.** Structural breakage in dependency health
-   should block release the same way `trellis`'s `BLOCK` verdict blocks a merge.
+1. **Scope is the dependency tree, not application code.** Reads `package.json` off disk directly
+   — never the app's own logic or diff.
+2. **License checks are a hard gate, same as security.** A banned license blocks the same way a
+   critical CVE would.
+3. **A finding here is a build gate, not a suggestion.** `verdict: BLOCK` should block release the
+   same way `trellis`'s `BLOCK` blocks a merge.
+
+## Honest scope
+
+A **manifest-shape linter, not a CVE scanner**. Two local checks only: is the declared `license`
+in a banned set (default `GPL-3.0`, `AGPL-3.0`)? Does any dependency point at an unpinned `git+`
+or `http://` URL? **It queries no advisory database** (npm audit, OSV, GitHub Advisories) and has
+no notion of a CVE; it reads only the direct `dependencies`/`devDependencies` of the one manifest
+you point it at, not the resolved transitive tree. Pair with `npm audit`/`pip-audit` for real CVE
+coverage — lookout only adds the license gate and unpinned-source check those tools skip.
 
 ## When to use
 
-- Checking a package or its transitive dependencies for known CVEs before release.
-- Verifying license compatibility across the full dependency tree.
-- Gating a build on dependency health as part of a verify/release phase.
+- Checking a `package.json`'s license against policy, or flagging unpinned git/http dependency
+  sources, as one gate among several — not your only dependency security check.
 
 ## When NOT to use
 
-- **The concern is this diff's own logic or injection risk, not a third-party package** →
-  use `mirror`. Lookout never reads application code.
-- **The goal is to actively probe or exploit a live target, not audit static manifests** →
-  use `siege`. Lookout is passive and manifest-scoped; it never touches running services.
+- **Actual CVE/vulnerability data** → lookout has none; pair with `npm audit` or equivalent.
+- **This diff's own logic, not a third-party package** → use `mirror`.
+- **Probing or exploiting a live target** → use `siege`; lookout is passive and manifest-scoped.
 
-## Usage Commands
+## Usage (library, not a CLI)
 
-Audit package manifest in current directory:
-```bash
-node lib/lookout.js --manifest "package.json"
+```js
+import { LookoutAuditor } from './lib/lookout.js';
+
+const auditor = new LookoutAuditor({ bannedLicenses: ['GPL-3.0', 'AGPL-3.0'] });
+const result = auditor.auditPackageJson('/path/to/package.json');
+// result.verdict: 'PASS' | 'WARN' | 'BLOCK'
+// result.findings: [{ type: 'license'|'security', severity, package, message }, ...]
 ```
-
----
-
-## Spark Breakthrough Enhancement
-
-- **Feature**: **Real-Time Vulnerability Egress Guard**
-- **Description**: Blocks risky AGPL licenses and compromised package manifests pre-commit.
-- **Synergy**: Integrated with `sentinel` (firewall) & `shipwright` (git publisher).
-- **Framework**: Applied via the `spark` 4-Lens Lateral Ideation Engine.
