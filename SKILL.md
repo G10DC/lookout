@@ -2,12 +2,15 @@
 name: lookout
 status: implemented
 description: >-
-  Audits declared dependencies for known vulnerabilities and license compliance
-  issues -- validates node_modules or equivalent against security advisories and
-  license policy before a build ships. Use when checking if a package has known
-  CVEs or verifying license compatibility before release. Never review
-  application source code logic -- use mirror instead; never actively probe a
-  live target -- use siege instead.
+  Manifest-level dependency policy check: flags a banned licence declared in
+  package.json and dependencies pinned to a git+ or http:// URL instead of a
+  registry version. Consults NO advisory database and reads no lockfile or
+  node_modules, so it cannot tell you whether a package has a known CVE, and it
+  does not see transitive or dependency licences -- only the manifest's own.
+  Use as a cheap pre-build policy gate. Never treat a PASS as evidence the
+  dependency tree was audited -- run a real advisory scanner for that; never
+  review application source code logic -- use mirror; never probe a live target
+  -- use siege.
 ---
 
 # lookout
